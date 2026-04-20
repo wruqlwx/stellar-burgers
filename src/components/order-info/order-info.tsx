@@ -1,36 +1,31 @@
-import { FC, useMemo, useEffect, useState } from 'react';
+import { FC, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useSelector } from '../../services/store';
+import { useSelector, useDispatch } from '../../services/store';
 import { TIngredient, TOrder } from '@utils-types';
-import { getOrderByNumberApi } from '../../utils/burger-api';
+import { getOrderByNumber } from '../../services/slices/orderSlice';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
 
 export const OrderInfo: FC = () => {
   const { number } = useParams<{ number: string }>();
-  const [orderData, setOrderData] = useState<TOrder | null>(null);
+  const dispatch = useDispatch();
+  const { orderModalData, orderRequest } = useSelector((state) => state.order);
   const { ingredients } = useSelector((state) => state.ingredients);
 
   useEffect(() => {
     if (number) {
-      getOrderByNumberApi(parseInt(number))
-        .then((data) => {
-          setOrderData(data as TOrder);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+      dispatch(getOrderByNumber(parseInt(number)));
     }
-  }, [number]);
+  }, [dispatch, number]);
 
   const orderInfo = useMemo(() => {
-    if (!orderData || !ingredients.length) return null;
+    if (!orderModalData || !ingredients.length) return null;
 
     type TIngredientsWithCount = {
       [key: string]: TIngredient & { count: number };
     };
 
-    const ingredientsInfo = orderData.ingredients.reduce(
+    const ingredientsInfo = orderModalData.ingredients.reduce(
       (acc: TIngredientsWithCount, item: string) => {
         const ingredient = ingredients.find(
           (ing: TIngredient) => ing._id === item
@@ -53,14 +48,14 @@ export const OrderInfo: FC = () => {
     );
 
     return {
-      ...orderData,
+      ...orderModalData,
       ingredientsInfo,
-      date: new Date(orderData.createdAt),
+      date: new Date(orderModalData.createdAt),
       total
     };
-  }, [orderData, ingredients]);
+  }, [orderModalData, ingredients]);
 
-  if (!orderInfo) return <Preloader />;
+  if (!orderInfo || orderRequest) return <Preloader />;
 
   return <OrderInfoUI orderInfo={orderInfo} />;
 };

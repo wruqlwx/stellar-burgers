@@ -1,5 +1,10 @@
+export type TFeedInfo = {
+  total: number;
+  totalToday: number;
+};
+
 export type FeedInfoUIProps = {
-  feed: any;
+  feed: TFeedInfo;
   readyOrders: number[];
   pendingOrders: number[];
 };

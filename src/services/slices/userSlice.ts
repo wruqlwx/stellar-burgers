@@ -6,12 +6,15 @@ import {
   registerUserApi,
   logoutApi,
   updateUserApi,
-  fetchWithRefresh
+  fetchWithRefresh,
+  TCredentials,
+  TRegisterCredentials,
+  TUpdateUserData
 } from '../../utils/burger-api';
 
 export const registerUser = createAsyncThunk(
   'user/register',
-  async (data: any) => {
+  async (data: TRegisterCredentials) => {
     const res = await registerUserApi(data);
     localStorage.setItem('accessToken', res.accessToken);
     localStorage.setItem('refreshToken', res.refreshToken);
@@ -19,12 +22,15 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-export const loginUser = createAsyncThunk('user/login', async (data: any) => {
-  const res = await loginUserApi(data);
-  localStorage.setItem('accessToken', res.accessToken);
-  localStorage.setItem('refreshToken', res.refreshToken);
-  return res.user;
-});
+export const loginUser = createAsyncThunk(
+  'user/login',
+  async (data: TCredentials) => {
+    const res = await loginUserApi(data);
+    localStorage.setItem('accessToken', res.accessToken);
+    localStorage.setItem('refreshToken', res.refreshToken);
+    return res.user;
+  }
+);
 
 export const logoutUser = createAsyncThunk('user/logout', async () => {
   await logoutApi();
@@ -32,10 +38,13 @@ export const logoutUser = createAsyncThunk('user/logout', async () => {
   localStorage.removeItem('refreshToken');
 });
 
-export const updateUser = createAsyncThunk('user/update', async (data: any) => {
-  const res = await updateUserApi(data);
-  return res.user;
-});
+export const updateUser = createAsyncThunk(
+  'user/update',
+  async (data: TUpdateUserData) => {
+    const res = await updateUserApi(data);
+    return res.user;
+  }
+);
 
 export const checkUserAuth = createAsyncThunk('user/checkAuth', async () => {
   if (localStorage.getItem('accessToken')) {
@@ -93,8 +102,15 @@ export const userSlice = createSlice({
       .addCase(updateUser.fulfilled, (state, action) => {
         state.user = action.payload;
       })
+      .addCase(fetchUserOrders.pending, (state) => {
+        state.isLoading = true;
+      })
       .addCase(fetchUserOrders.fulfilled, (state, action) => {
+        state.isLoading = false;
         state.orders = action.payload;
+      })
+      .addCase(fetchUserOrders.rejected, (state) => {
+        state.isLoading = false;
       });
   }
 });

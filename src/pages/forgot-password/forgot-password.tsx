@@ -19,7 +19,10 @@ export const ForgotPassword: FC = () => {
         localStorage.setItem('resetPassword', 'true');
         navigate('/reset-password', { replace: true });
       })
-      .catch((err: any) => setError(err));
+      .catch((err: unknown) => {
+        const error = err as { message?: string };
+        setError(new Error(error.message || 'Ошибка при отправке email'));
+      });
   };
 
   return (

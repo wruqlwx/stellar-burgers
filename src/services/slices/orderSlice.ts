@@ -1,7 +1,15 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { orderBurgerApi } from '../../utils/burger-api';
+import { orderBurgerApi, getOrderByNumberApi } from '../../utils/burger-api';
 import { TOrder } from '@utils-types';
 import { clearConstructor } from './constructorSlice';
+
+export const getOrderByNumber = createAsyncThunk<TOrder, number>(
+  'order/getByNumber',
+  async (number: number) => {
+    const response = await getOrderByNumberApi(number);
+    return response;
+  }
+);
 
 export const orderBurger = createAsyncThunk(
   'order/post',
@@ -36,6 +44,17 @@ export const orderSlice = createSlice({
       .addCase(orderBurger.rejected, (state, action) => {
         state.orderRequest = false;
         state.error = action.error.message || 'Order failed';
+      })
+      .addCase(getOrderByNumber.pending, (state) => {
+        state.orderRequest = true;
+      })
+      .addCase(getOrderByNumber.fulfilled, (state, action) => {
+        state.orderRequest = false;
+        state.orderModalData = action.payload;
+      })
+      .addCase(getOrderByNumber.rejected, (state, action) => {
+        state.orderRequest = false;
+        state.error = action.error.message || 'Failed to get order';
       });
   }
 });
