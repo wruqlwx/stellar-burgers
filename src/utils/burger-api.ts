@@ -1,4 +1,10 @@
-export const BURGER_API_URL = 'https://norma.education-services.ru/api';
+export const BURGER_API_URL =
+  process.env.BURGER_API_URL || 'https://norma.education-services.ru/api';
+
+interface TServerResponse<T> {
+  success: boolean;
+  message?: string;
+}
 
 const checkResponse = <T>(res: Response): Promise<T> =>
   res.ok ? res.json() : res.json().then((err) => Promise.reject(err));
@@ -9,8 +15,17 @@ export const request = <T>(
 ): Promise<T> =>
   fetch(`${BURGER_API_URL}${endpoint}`, options).then(checkResponse<T>);
 
-export const refreshToken = (): Promise<any> =>
-  request<any>('/auth/token', {
+export interface TAuthResponse extends TServerResponse<any> {
+  accessToken: string;
+  refreshToken: string;
+  user: {
+    email: string;
+    name: string;
+  };
+}
+
+export const refreshToken = (): Promise<TAuthResponse> =>
+  request<TAuthResponse>('/auth/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token: localStorage.getItem('refreshToken') })
@@ -25,7 +40,6 @@ export const fetchWithRefresh = async <T>(
   } catch (err: any) {
     if (err.message === 'jwt expired') {
       const refreshData = await refreshToken();
-      if (!refreshData.success) return Promise.reject(refreshData);
       localStorage.setItem('refreshToken', refreshData.refreshToken);
       localStorage.setItem('accessToken', refreshData.accessToken);
       options.headers.Authorization = refreshData.accessToken;
@@ -41,34 +55,34 @@ export const getIngredientsApi = () =>
   );
 
 export const loginUserApi = (data: any) =>
-  request<any>('/auth/login', {
+  request<TAuthResponse>('/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   });
 
 export const registerUserApi = (data: any) =>
-  request<any>('/auth/register', {
+  request<TAuthResponse>('/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   });
 
 export const logoutApi = () =>
-  request<any>('/auth/logout', {
+  request<{ success: boolean }>('/auth/logout', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token: localStorage.getItem('refreshToken') })
   });
 
 export const getUserApi = () =>
-  fetchWithRefresh<any>('/auth/user', {
+  fetchWithRefresh<{ success: boolean; user: any }>('/auth/user', {
     method: 'GET',
     headers: { Authorization: localStorage.getItem('accessToken') || '' }
   });
 
 export const updateUserApi = (data: any) =>
-  fetchWithRefresh<any>('/auth/user', {
+  fetchWithRefresh<{ success: boolean; user: any }>('/auth/user', {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -77,10 +91,21 @@ export const updateUserApi = (data: any) =>
     body: JSON.stringify(data)
   });
 
-export const getFeedsApi = () => request<any>('/orders/all');
+export const getFeedsApi = () =>
+  request<{
+    success: boolean;
+    orders: any[];
+    total: number;
+    totalToday: number;
+  }>('/orders/all');
+
+export const getOrderByNumberApi = (number: number) =>
+  request<{ success: boolean; orders: any[] }>(`/orders/${number}`).then(
+    (res) => res.orders[0]
+  );
 
 export const orderBurgerApi = (ingredients: string[]) =>
-  fetchWithRefresh<any>('/orders', {
+  fetchWithRefresh<{ success: boolean; order: any }>('/orders', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -89,20 +114,15 @@ export const orderBurgerApi = (ingredients: string[]) =>
     body: JSON.stringify({ ingredients })
   });
 
-export const getOrderByNumberApi = (number: number) =>
-  request<{ success: boolean; orders: any[] }>(`/orders/${number}`).then(
-    (res) => res.orders[0]
-  );
-
 export const forgotPasswordApi = (data: { email: string }) =>
-  request<any>('/password-reset', {
+  request<TServerResponse<any>>('/password-reset', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   });
 
 export const resetPasswordApi = (data: any) =>
-  request<any>('/password-reset/reset', {
+  request<TServerResponse<any>>('/password-reset/reset', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)

@@ -1,23 +1,18 @@
 import { FC, useEffect } from 'react';
-import { TOrder } from '@utils-types';
 import { useDispatch, useSelector } from '../../services/store';
 import { fetchUserOrders } from '../../services/slices/userSlice';
-import { Preloader } from '../../components/ui/preloader';
 import { ProfileOrdersUI } from '../../components/ui/pages/profile-orders';
+import { Preloader } from '../../components/ui/preloader';
 
 export const ProfileOrders: FC = () => {
   const dispatch = useDispatch();
-
-  const orders: TOrder[] = useSelector((state) => state.user.orders);
-  const user = useSelector((state) => state.user.user);
+  const { orders, isLoading } = useSelector((state) => state.user);
 
   useEffect(() => {
-    if (user) {
-      dispatch(fetchUserOrders());
-    }
-  }, [dispatch, user]);
+    dispatch(fetchUserOrders());
+  }, [dispatch]);
 
-  if (!orders.length) {
+  if (isLoading) {
     return <Preloader />;
   }
 

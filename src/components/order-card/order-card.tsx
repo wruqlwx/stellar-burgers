@@ -19,7 +19,7 @@ export const OrderCard: FC<{ order: TOrder }> = memo(({ order }) => {
 
     const ingredientsInfo = orderIngredients.reduce(
       (acc: TIngredient[], item) => {
-        if (!acc.includes(item)) acc.push(item);
+        if (!acc.find((ing) => ing._id === item._id)) acc.push(item);
         return acc;
       },
       []

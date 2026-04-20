@@ -15,6 +15,10 @@ p {
   width: 120px;
 }
 
+.tabs {
+  display: flex;
+}
+
 .content {
   overflow-y: scroll;
 }

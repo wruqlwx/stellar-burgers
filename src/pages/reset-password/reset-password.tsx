@@ -18,7 +18,7 @@ export const ResetPassword: FC = () => {
         localStorage.removeItem('resetPassword');
         navigate('/login');
       })
-      .catch((err: any) => setError(err));
+      .catch((err) => setError(err));
   };
 
   useEffect(() => {

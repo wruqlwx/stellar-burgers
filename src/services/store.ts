@@ -5,34 +5,30 @@ import {
   TypedUseSelectorHook
 } from 'react-redux';
 
-import ingredientsReducer, {
-  ingredientsSlice
-} from './slices/ingredientsSlice';
-import orderReducer, { orderSlice } from './slices/orderSlice';
-import userReducer, { userSlice } from './slices/userSlice';
-import constructorReducer, {
-  constructorSlice
-} from './slices/constructorSlice';
-import feedReducer from './slices/feedSlice';
+import userReducer from './slices/userSlice';
+import ingredientsReducer from './slices/ingredientsSlice';
+import constructorReducer from './slices/constructorSlice';
+import orderReducer from './slices/orderSlice';
+import feedReducer from './slices/feedSlice'; // Убедись, что импорт верный
 
 const rootReducer = combineReducers({
-  [ingredientsSlice.name]: ingredientsReducer,
-  [orderSlice.name]: orderReducer,
-  [userSlice.name]: userReducer,
-  [constructorSlice.name]: constructorReducer,
-  feeds: feedReducer
+  user: userReducer,
+  ingredients: ingredientsReducer,
+  constructorSlice: constructorReducer,
+  order: orderReducer,
+  feeds: feedReducer // КЛЮЧ ДОЛЖЕН БЫТЬ 'feeds', чтобы feed.tsx его видел
 });
 
-export const store = configureStore({
+const store = configureStore({
   reducer: rootReducer,
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({ serializableCheck: false })
+  devTools: process.env.NODE_ENV !== 'production'
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;
 
-export const useDispatch: () => AppDispatch = () => dispatchHook<AppDispatch>();
+// Используй ЭТИ хуки в компонентах, чтобы не было ошибки "state has any type"
+export const useDispatch: () => AppDispatch = dispatchHook;
 export const useSelector: TypedUseSelectorHook<RootState> = selectorHook;
 
 export default store;

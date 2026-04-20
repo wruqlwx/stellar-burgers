@@ -4,19 +4,50 @@ import {
   getUserApi,
   loginUserApi,
   registerUserApi,
-  updateUserApi,
   logoutApi,
+  updateUserApi,
   fetchWithRefresh
 } from '../../utils/burger-api';
 
-export const loginUser = createAsyncThunk('user/login', loginUserApi);
-export const checkUserAuth = createAsyncThunk('user/checkAuth', getUserApi);
-export const updateUser = createAsyncThunk('user/update', updateUserApi);
-export const registerUser = createAsyncThunk('user/register', registerUserApi);
+export const registerUser = createAsyncThunk(
+  'user/register',
+  async (data: any) => {
+    const res = await registerUserApi(data);
+    localStorage.setItem('accessToken', res.accessToken);
+    localStorage.setItem('refreshToken', res.refreshToken);
+    return res.user;
+  }
+);
+
+export const loginUser = createAsyncThunk('user/login', async (data: any) => {
+  const res = await loginUserApi(data);
+  localStorage.setItem('accessToken', res.accessToken);
+  localStorage.setItem('refreshToken', res.refreshToken);
+  return res.user;
+});
+
 export const logoutUser = createAsyncThunk('user/logout', async () => {
   await logoutApi();
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
+});
+
+export const updateUser = createAsyncThunk('user/update', async (data: any) => {
+  const res = await updateUserApi(data);
+  return res.user;
+});
+
+export const checkUserAuth = createAsyncThunk('user/checkAuth', async () => {
+  if (localStorage.getItem('accessToken')) {
+    try {
+      const res = await getUserApi();
+      return res.user;
+    } catch {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+    }
+  }
+  return null;
 });
 
 export const fetchUserOrders = createAsyncThunk('user/getOrders', async () => {
@@ -30,23 +61,15 @@ export const fetchUserOrders = createAsyncThunk('user/getOrders', async () => {
   return res.orders;
 });
 
-interface UserState {
-  user: TUser | null;
-  orders: TOrder[];
-  isAuthChecked: boolean;
-  error: string | null;
-}
-
-const initialState: UserState = {
-  user: null,
-  orders: [],
-  isAuthChecked: false,
-  error: null
-};
-
 export const userSlice = createSlice({
   name: 'user',
-  initialState,
+  initialState: {
+    user: null as TUser | null,
+    orders: [] as TOrder[],
+    isLoading: false,
+    isAuthChecked: false,
+    error: null as string | null
+  },
   reducers: {
     clearError: (state) => {
       state.error = null;
@@ -55,32 +78,20 @@ export const userSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(checkUserAuth.fulfilled, (state, action) => {
-        state.user = action.payload.user;
+        state.user = action.payload;
         state.isAuthChecked = true;
       })
       .addCase(checkUserAuth.rejected, (state) => {
         state.isAuthChecked = true;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        state.user = action.payload.user;
-        state.error = null;
-      })
-      .addCase(loginUser.rejected, (state, action) => {
-        state.error = action.error.message || 'Ошибка входа';
-      })
-      .addCase(registerUser.fulfilled, (state, action) => {
-        state.user = action.payload.user;
-        state.error = null;
-      })
-      .addCase(registerUser.rejected, (state, action) => {
-        state.error = action.error.message || 'Ошибка регистрации';
-      })
-      .addCase(updateUser.fulfilled, (state, action) => {
-        state.user = action.payload.user;
+        state.user = action.payload;
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
-        state.orders = [];
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.user = action.payload;
       })
       .addCase(fetchUserOrders.fulfilled, (state, action) => {
         state.orders = action.payload;
