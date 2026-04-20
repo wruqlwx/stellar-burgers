@@ -96,6 +96,9 @@ export const userSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.user = action.payload;
       })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.user = action.payload;
+      })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
       })
