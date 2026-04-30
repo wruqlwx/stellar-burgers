@@ -1,0 +1,35 @@
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "643d69b5c3f7b9001cfa093d",
+      "name": "Флюоресцентная булка",
+      "type": "bun",
+      "price": 988,
+      "image": "https://code.s3.yandex.net/173mschcdfcko60/FluorescentBun.png",
+      "image_mobile": "https://code.s3.yandex.net/173mschcdfcko60/FluorescentBun-mobile.png",
+      "image_large": "https://code.s3.yandex.net/173mschcdfcko60/FluorescentBun-large.png",
+      "__v": 0
+    },
+    {
+      "_id": "643d69b5c3f7b9001cfa093e",
+      "name": "Биокотлета из марсианской Магнолии",
+      "type": "main",
+      "price": 414,
+      "image": "https://code.s3.yandex.net/173mschcdfcko60/Meatball.png",
+      "image_mobile": "https://code.s3.yandex.net/173mschcdfcko60/Meatball-mobile.png",
+      "image_large": "https://code.s3.yandex.net/173mschcdfcko60/Meatball-large.png",
+      "__v": 0
+    },
+    {
+      "_id": "643d69b5c3f7b9001cfa093f",
+      "name": "Соус Spicy-X",
+      "type": "sauce",
+      "price": 414,
+      "image": "https://code.s3.yandex.net/173mschcdfcko60/SpicyX.png",
+      "image_mobile": "https://code.s3.yandex.net/173mschcdfcko60/SpicyX-mobile.png",
+      "image_large": "https://code.s3.yandex.net/173mschcdfcko60/SpicyX-large.png",
+      "__v": 0
+    }
+  ]
+}
