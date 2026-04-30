@@ -1,38 +1,46 @@
 import { forwardRef, useMemo } from 'react';
-import { TIngredientsCategoryProps } from './type';
 import { TIngredient } from '@utils-types';
+import { useSelector, useDispatch } from '../../services/store';
 import { IngredientsCategoryUI } from '../ui/ingredients-category';
+import { addIngredient } from '../../services/slices/constructorSlice';
+import React from 'react';
+
+interface TIngredientsCategoryProps {
+  title: string;
+  titleId: string;
+  ingredients: TIngredient[];
+}
 
 export const IngredientsCategory = forwardRef<
-  HTMLUListElement,
+  HTMLHeadingElement,
   TIngredientsCategoryProps
->(({ title, titleRef, ingredients }, ref) => {
-  /** TODO: взять переменную из стора */
-  const burgerConstructor = {
-    bun: {
-      _id: ''
-    },
-    ingredients: []
-  };
+>(({ title, titleId, ingredients }, ref) => {
+  const dispatch = useDispatch();
+  const { bun, ingredients: constructorIngredients } = useSelector(
+    (state) => state.constructorSlice
+  );
 
   const ingredientsCounters = useMemo(() => {
-    const { bun, ingredients } = burgerConstructor;
-    const counters: { [key: string]: number } = {};
-    ingredients.forEach((ingredient: TIngredient) => {
-      if (!counters[ingredient._id]) counters[ingredient._id] = 0;
-      counters[ingredient._id]++;
+    const counts: { [key: string]: number } = {};
+    constructorIngredients.forEach((item: TIngredient) => {
+      counts[item._id] = (counts[item._id] || 0) + 1;
     });
-    if (bun) counters[bun._id] = 2;
-    return counters;
-  }, [burgerConstructor]);
+    if (bun) counts[bun._id] = 2;
+    return counts;
+  }, [bun, constructorIngredients]);
+
+  const handleAdd = (ingredient: TIngredient) => {
+    dispatch(addIngredient(ingredient));
+  };
 
   return (
     <IngredientsCategoryUI
       title={title}
-      titleRef={titleRef}
+      titleId={titleId}
       ingredients={ingredients}
       ingredientsCounters={ingredientsCounters}
-      ref={ref}
+      titleRef={ref}
+      handleAdd={handleAdd}
     />
   );
 });
