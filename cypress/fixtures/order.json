@@ -1,0 +1,15 @@
+{
+  "success": true,
+  "name": "Тестовый заказ",
+  "order": {
+    "number": 12345,
+    "_id": "test_id",
+    "owner": "test_user",
+    "status": "done",
+    "name": "Тестовый бургер",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z",
+    "ingredients": [],
+    "__v": 0
+  }
+}
