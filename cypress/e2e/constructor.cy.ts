@@ -15,18 +15,22 @@ describe('Конструктор бургера', () => {
 
   describe('Модальное окно ингредиента', () => {
     it('должно открыться при клике на название ингредиента', () => {
-      cy.get('ul.burger-ingredients__list').first().find('a').first().click();
-      cy.get('#modal').should('be.visible');
+      cy.get('ul.burger-ingredients__list').first().find('li').first().find('a').then(($link) => {
+        const ingredientName = $link.find('p').text();
+        cy.wrap($link).click();
+        cy.get('#modal').should('be.visible');
+        cy.get('#modal').should('contain', ingredientName);
+      });
     });
 
     it('должно закрыться при клике на кнопку закрытия', () => {
-      cy.get('ul.burger-ingredients__list').first().find('a').first().click();
+      cy.get('ul.burger-ingredients__list').first().find('li').first().find('a').click();
       cy.get('#modal').find('button').first().click();
       cy.get('#modal').should('not.exist');
     });
 
     it('должно отображать правильные данные ингредиента', () => {
-      cy.get('ul.burger-ingredients__list').first().find('a').first().click();
+      cy.get('ul.burger-ingredients__list').first().find('li').first().find('a').click();
       cy.get('#modal').should('contain', 'Калорийность');
       cy.get('#modal').should('contain', 'Белки');
       cy.get('#modal').should('contain', 'Жиры');
